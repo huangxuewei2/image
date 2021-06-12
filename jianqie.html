@@ -1,0 +1,311 @@
+<!DOCTYPE HTML>
+<html>
+
+<head lang="en">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>图片剪切</title>
+    <script src="http://cdn.bootcss.com/jquery/2.2.0/jquery.min.js" type="text/javascript"></script>
+    <script src="js/jquery-ui-1.12.0/jquery-ui.min.js"></script>
+    <link href="img.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="img.js"></script>
+</head>
+
+<body>
+    <div id="box">
+        <img src="./img.png" id="img1">
+        <img src="./img.png" id="img2">
+        <div id="main">
+            <div id="left-up" class="minDiv left-up"></div>
+            <div id="up" class="minDiv up"></div>
+            <div id="right-up" class="minDiv right-up"></div>
+            <div id="right" class="minDiv right"></div>
+            <div id="right-down" class="minDiv right-down"></div>
+            <div id="down" class="minDiv down"></div>
+            <div id="left-down" class="minDiv left-down"></div>
+            <div id="left" class="minDiv left"></div>
+        </div>
+    </div>
+    <div id="preview">
+        <img src="./img.png" id="img3">
+    </div>
+
+</body>
+
+</html>
+<style>
+    body {
+        background-color: #333;
+    }
+
+    #box {
+        position: absolute;
+        top: 200px;
+        left: 100px;
+        width: 600px;
+        height: 319px;
+    }
+
+    #img1 {
+        opacity: 0.3;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+    }
+
+    #img2 {
+        position: absolute;
+        top: 0;
+        left: 0;
+        clip: rect(0, 200px, 200px, 0);
+    }
+
+    #main {
+        position: absolute;
+        border: 1px solid #fff;
+        width: 100px;
+        height: 100px;
+    }
+
+    #preview {
+        position: absolute;
+        width: 600px;
+        height: 319px;
+        top: 200px;
+        left: 720px;
+    }
+
+    #preview img {
+        position: absolute;
+    }
+
+    .minDiv {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background-color: #fff;
+    }
+
+    .left-up {
+        top: -4px;
+        left: -4px;
+        cursor: nw-resize;
+    }
+
+    .up {
+        left: 50%;
+        margin-left: -4px;
+        top: -4px;
+        cursor: n-resize;
+    }
+
+    .right-up {
+        right: -4px;
+        top: -4px;
+        cursor: ne-resize;
+    }
+
+    .right {
+        top: 50%;
+        margin-top: -4px;
+        right: -4px;
+        cursor: e-resize;
+    }
+
+    .right-down {
+        bottom: -4px;
+        right: -4px;
+        cursor: se-resize;
+    }
+
+    .down {
+        left: 50%;
+        margin-left: -4px;
+        bottom: -4px;
+        cursor: s-resize;
+    }
+
+    .left-down {
+        left: -4px;
+        bottom: -4px;
+        cursor: sw-resize;
+    }
+
+    .left {
+        bottom: 50%;
+        margin-bottom: -4px;
+        left: -4px;
+        cursor: w-resize;
+    }
+</style>
+
+<script>
+    window.onload = function () {
+
+        document.onselectstart = new Function('event.returnValue=false;');
+        $("#main").draggable({ containment: 'parent', drag: setChoice });
+        var img = document.getElementById("img2");
+        var rightDiv = document.getElementById("right");
+        var upDiv = document.getElementById("up");
+        var leftDiv = document.getElementById("left");
+        var downDiv = document.getElementById("down");
+        var leftupDiv = document.getElementById("left-up");
+        var rightupDiv = document.getElementById("right-up");
+        var rightdownDiv = document.getElementById("right-down");
+        var leftdownDiv = document.getElementById("left-down");
+        var mainDiv = document.getElementById("main");
+        var ifKeyDown = false;
+        var contact = "";
+        rightDiv.onmousedown = function (e) {
+            e.stopPropagation();
+            ifKeyDown = true;
+            contact = "right";
+        }
+        upDiv.onmousedown = function (e) {
+            e.stopPropagation();
+            ifKeyDown = true;
+            contact = "up";
+        }
+        leftDiv.onmousedown = function (e) {
+            e.stopPropagation();
+            ifKeyDown = true;
+            contact = "left";
+        }
+        downDiv.onmousedown = function (e) {
+            e.stopPropagation();
+            ifKeyDown = true;
+            contact = "down";
+        }
+        leftupDiv.onmousedown = function (e) {
+            e.stopPropagation();
+            ifKeyDown = true;
+            contact = "left-up";
+        }
+        rightupDiv.onmousedown = function (e) {
+            e.stopPropagation();
+            ifKeyDown = true;
+            contact = "right-up";
+        }
+        rightdownDiv.onmousedown = function (e) {
+            e.stopPropagation();
+            ifKeyDown = true;
+            contact = "right-down";
+        }
+        leftdownDiv.onmousedown = function (e) {
+            e.stopPropagation();
+            ifKeyDown = true;
+            contact = "left-down";
+        }
+
+        window.onmouseup = function () {
+            ifKeyDown = false;
+        }
+        window.onmousemove = function (e) {
+            if (ifKeyDown == true) {
+
+                switch (contact) {
+                    case "right": rightMove(e); break;
+                    case "up": upMove(e); break;
+                    case "left": leftMove(e); break;
+                    case "down": downMove(e); break;
+                    case "left-up": leftMove(e); upMove(e); break;
+                    case "right-up": rightMove(e); upMove(e); break;
+                    case "right-down": rightMove(e); downMove(e); break;
+                    case "left-down": leftMove(e); downMove(e); break;
+                }
+
+            }
+            setChoice();
+            setPreview();
+
+        }
+        function rightMove(e) {
+            var x = e.clientX;
+            var addWidth = "";
+            var widthBefore = mainDiv.offsetWidth - 2;
+            addWidth = x - getPosition(mainDiv).left
+            if (widthBefore <= img.width) {
+                mainDiv.style.width = addWidth + "px";
+            } else {
+                mainDiv.style.width = img.width + "px";
+            }
+        }
+        function upMove(e) {
+            var topBefore = mainDiv.offsetTop;
+            var y = e.clientY;
+            var addHeight = 0;
+            var mainY = getPosition(mainDiv).top;
+            addHeight = y - mainY;
+            var heightBefore = mainDiv.offsetHeight - 2;
+            var bottom = topBefore + heightBefore;
+
+            var heightAfter = heightBefore - addHeight;
+            var topAfter = mainDiv.offsetTop + addHeight;
+
+            if (topAfter < bottom && topAfter > -2) {
+                mainDiv.style.height = heightAfter + "px";
+                mainDiv.style.top = topAfter + "px";
+            }
+
+        }
+
+        function leftMove(e) {
+            var leftBefore = mainDiv.offsetLeft;
+            var x = e.clientX;
+            var addWidth = 0;
+            var widthBefore = mainDiv.offsetWidth - 2;
+            var mainDivLeft = getPosition(mainDiv).left;
+            var right = leftBefore + widthBefore;
+            addWidth = x - mainDivLeft;
+            var widthAfter = widthBefore - addWidth;
+            var leftAfter = mainDiv.offsetLeft + addWidth;
+            if (leftAfter < right && leftAfter > -2) {
+                mainDiv.style.width = widthAfter + "px";
+                mainDiv.style.left = leftAfter + "px";
+            }
+        }
+        function downMove(e) {
+            var y = e.clientY;
+            var addHeight = 0;
+            var heightBefore = mainDiv.offsetHeight - 2;
+            addHeight = y - getPosition(mainDiv).top;
+            if (heightBefore <= img.height) {
+                mainDiv.style.height = addHeight + "px";
+            } else {
+                mainDiv.style.height = img.height + "px";
+            }
+        }
+
+        function getPosition(node) {
+            var left = node.offsetLeft;
+            var top = node.offsetTop;
+            var parent = node.offsetParent;
+            while (parent != null) {
+                left += parent.offsetLeft;
+                top += parent.offsetTop;
+                parent = parent.offsetParent;
+            }
+            return { "left": left, "top": top };
+        }
+
+
+        function setChoice() {
+            var top = mainDiv.offsetTop;
+            var right = mainDiv.offsetLeft + mainDiv.offsetWidth;
+            var bottom = mainDiv.offsetTop + mainDiv.offsetHeight;
+            var left = mainDiv.offsetLeft;
+            img.style.clip = "rect(" + top + "px," + right + "px," + bottom + "px," + left + "px" + ")"
+        }
+
+        function setPreview() {
+            var top = mainDiv.offsetTop;
+            var right = mainDiv.offsetLeft + mainDiv.offsetWidth;
+            var bottom = mainDiv.offsetTop + mainDiv.offsetHeight;
+            var left = mainDiv.offsetLeft;
+            var img3 = document.getElementById("img3");
+            img3.style.clip = "rect(" + top + "px," + right + "px," + bottom + "px," + left + "px" + ")"
+            img3.style.top = -(top) + "px";
+            img3.style.left = -(left) + "px";
+        }
+    }
+</script>

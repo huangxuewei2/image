@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="img-box"></div>
+    <input type="file" id="imgfile" />
+    <button onclick="getfile()">压缩</button>
+</body>
+
+</html>
+<script>
+
+    var imgbox = document.getElementById("img-box");
+    function getfile() {
+        var fileList = document.getElementById("imgfile").files[0];
+        var reader = new FileReader();
+        reader.readAsDataURL(fileList);
+        reader.onload = function (e) {
+            yasuo(this.result);
+            var img1 = document.createElement("img");
+            img1.src = this.result;
+            imgbox.appendChild(img1);
+        }
+    }
+    function yasuo(img) {
+        var image = new Image();
+        image.crossOrigin = '';
+        image.src = img;
+        image.onload = function () {
+            var base64 = getBase64Image(image);
+            // var img2 = convertBase64UrlToBlob(base64);
+            var img2 = document.createElement("img");
+            img2.src = base64.dataURL;
+            imgbox.appendChild(img2);
+        }
+    }
+    function getBase64Image(img) {
+        var canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        var ctx = canvas.getContext("2d");
+        var canvaswidth = img.width * 0.1;
+        var canvasheight = img.height * 0.1;
+        canvas.width = canvaswidth;
+        canvas.height = canvasheight;
+        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvaswidth, canvasheight);
+        var ext = img.src.substring(img.src.lastIndexOf(".") + 1).toLowerCase();
+        var dataURL = canvas.toDataURL("image/" + ext);
+        return {
+            dataURL: dataURL,
+            type: "image/" + ext
+        };
+    }
+</script>

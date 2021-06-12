@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- <div id="canvas"></div> -->
+    <img src="./img.png" alt="">
+    <canvas id="canvas" data-src="./img.png" width="400" height="300"></canvas>
+    <button onclick="mosaicImage('canvas',8)">马赛克</button>
+</body>
+
+</html>
+<script>
+
+    const mosaicImage = (target, mosaicSize) => {
+        let canvas = document.getElementById(target),
+            _canvas = document.createElement('canvas');
+        if (!canvas || !canvas.getContext) {
+            return false;
+        }
+        const createMosaic = (context, width, height, size, data) => {
+            for (let y = 0; y < height; y += size) {
+                for (let x = 0; x < width; x += size) {
+                    let cR = data.data[(y * width + x) * 4],
+                        cG = data.data[(y * width + x) * 4 + 1],
+                        cB = data.data[(y * width + x) * 4 + 2];
+                    context.fillStyle = `rgb(${cR},${cG},${cB})`;
+                    context.fillRect(x, y, x + size, y + size);
+                }
+            }
+        };
+        const draw = (_context, imageData, context) => {
+            createMosaic(_context, _canvas.width, _canvas.height, mosaicSize, imageData);
+            context.drawImage(_canvas, 0, 0);
+        };
+
+        const init = () => {
+            let context = canvas.getContext('2d');
+            let img = new Image();
+            img.src = canvas.getAttribute('data-src');
+            img.onload = () => {
+                let _context = _canvas.getContext('2d'),
+                    imageData;
+                _canvas.width = img.width;
+                _canvas.height = img.height;
+                canvas.width = img.width;
+                canvas.height = img.height;
+                _context.drawImage(img, 0, 0);
+                imageData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+                draw(_context, imageData, context);
+            };
+        };
+        init();
+    };
+</script>
